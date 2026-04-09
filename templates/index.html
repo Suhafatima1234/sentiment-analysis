@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Sentiment Analyzer</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;padding:2rem 1rem}
+    .page{max-width:900px;margin:0 auto;display:grid;grid-template-columns:1fr 340px;gap:1.5rem}
+    @media(max-width:700px){.page{grid-template-columns:1fr}}
+    h1{font-size:22px;color:#1a1a1a;margin-bottom:4px}
+    .sub{font-size:13px;color:#888;margin-bottom:1.5rem}
+    .card{background:white;border-radius:12px;padding:1.5rem;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:1.5rem}
+    .card h2{font-size:14px;font-weight:600;color:#444;margin-bottom:1rem;text-transform:uppercase;letter-spacing:.05em}
+    textarea{width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:12px;font-size:14px;resize:vertical;min-height:120px}
+    textarea:focus{outline:none;border-color:#7f77dd}
+    button{margin-top:12px;width:100%;padding:12px;background:#534AB7;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer}
+    button:hover{background:#3C3489}
+    .result-box{margin-top:1.2rem;padding:1.2rem;border-radius:10px}
+    .positive{background:#e1f5ee;border-left:4px solid #1D9E75}
+    .negative{background:#fcebeb;border-left:4px solid #E24B4A}
+    .neutral{background:#f1efe8;border-left:4px solid #888780}
+    .rlabel{font-size:11px;color:#777;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+    .rvalue{font-size:24px;font-weight:700}
+    .positive .rvalue{color:#085041}
+    .negative .rvalue{color:#791F1F}
+    .neutral .rvalue{color:#444441}
+    .bar-bg{background:#e0e0e0;border-radius:4px;height:6px;margin-top:8px}
+    .bar-fill{height:6px;border-radius:4px}
+    .positive .bar-fill{background:#1D9E75}
+    .negative .bar-fill{background:#E24B4A}
+    .neutral .bar-fill{background:#888780}
+    .conf{font-size:13px;color:#777;margin-top:5px}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.2rem}
+    .stat{background:#f7f7fb;border-radius:8px;padding:.8rem 1rem;text-align:center}
+    .stat .val{font-size:20px;font-weight:700;color:#534AB7}
+    .stat .lbl{font-size:11px;color:#888;margin-top:2px}
+    .cm-img{width:100%;border-radius:8px;margin-top:.5rem}
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:.8rem}
+    .chip{font-size:12px;padding:5px 12px;border-radius:20px;border:1px solid #e0e0e0;cursor:pointer;color:#555;background:#fafafa}
+    .chip:hover{background:#f0eeff;border-color:#b3aee8;color:#3C3489}
+    .hist-item{padding:.6rem 0;border-bottom:.5px solid #f0f0f0;font-size:13px}
+    .hist-item:last-child{border-bottom:none}
+    .hist-label{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;margin-bottom:3px}
+    .hist-label.positive{background:#e1f5ee;color:#085041}
+    .hist-label.negative{background:#fcebeb;color:#791F1F}
+    .hist-label.neutral{background:#f1efe8;color:#444}
+    .hist-text{color:#555;font-size:12px}
+    .badge{font-size:11px;padding:2px 8px;border-radius:10px;background:#eeedfe;color:#3C3489;margin-left:8px;font-weight:500}
+  </style>
+</head>
+<body>
+<div class="page">
+  <div>
+    <h1>🔍 Sentiment Analyzer</h1>
+    <p class="sub">ML-powered analysis using {{ metadata.dataset }}</p>
+
+    <div class="card">
+      <form method="POST">
+        <label style="font-size:13px;color:#555;display:block;margin-bottom:6px">Enter a product or movie review</label>
+        <textarea name="review" placeholder="e.g. The product quality exceeded my expectations..." required>{{ review }}</textarea>
+        <button type="submit">Analyze Sentiment</button>
+      </form>
+
+      {% if result %}
+      <div class="result-box {{ result }}">
+        <div class="rlabel">Detected sentiment</div>
+        <div class="rvalue">
+          {% if result=='positive'%}😊 Positive
+          {% elif result=='negative'%}😞 Negative
+          {% else %}😐 Neutral{% endif %}
+        </div>
+        <div class="conf">Confidence: <strong>{{ confidence }}%</strong></div>
+        <div class="bar-bg"><div class="bar-fill" style="width:{{confidence}}%"></div></div>
+      </div>
+      {% endif %}
+
+      <div style="margin-top:1rem">
+        <p style="font-size:12px;color:#aaa;margin-bottom:6px">Try an example:</p>
+        <div class="chips">
+          <span class="chip" onclick="fill('Absolutely love this product, exceeded all expectations!')">⭐ Positive</span>
+          <span class="chip" onclick="fill('Terrible quality, broke after two days, waste of money.')">👎 Negative</span>
+          <span class="chip" onclick="fill('It is okay, works as expected, nothing special.')">😐 Neutral</span>
+        </div>
+      </div>
+    </div>
+
+    {% if history %}
+    <div class="card">
+      <h2>Recent analyses</h2>
+      {% for h in history %}
+      <div class="hist-item">
+        <span class="hist-label {{ h.label }}">{{ h.label }} · {{ h.confidence }}%</span>
+        <div class="hist-text">{{ h.text }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <div class="card">
+      <h2>Model performance <span class="badge">{{ metadata.model_name }}</span></h2>
+      <div class="stats">
+        <div class="stat"><div class="val">{{ metadata.accuracy }}%</div><div class="lbl">Accuracy</div></div>
+        <div class="stat"><div class="val">{{ metadata.f1_score }}%</div><div class="lbl">F1 Score</div></div>
+        <div class="stat"><div class="val">{{ metadata.train_size }}</div><div class="lbl">Train samples</div></div>
+        <div class="stat"><div class="val">{{ metadata.test_size }}</div><div class="lbl">Test samples</div></div>
+      </div>
+      <div style="font-size:12px;color:#aaa">Dataset: {{ metadata.dataset }}<br>Features: {{ metadata.features }} TF-IDF · N-grams: {{ metadata.ngrams }}</div>
+    </div>
+
+    <div class="card">
+      <h2>Confusion matrix</h2>
+      <img src="/static/confusion_matrix.png" class="cm-img" alt="Confusion Matrix">
+    </div>
+  </div>
+</div>
+
+<script>
+  function fill(t){ document.querySelector('textarea[name=review]').value = t; }
+</script>
+</body>
+</html>
