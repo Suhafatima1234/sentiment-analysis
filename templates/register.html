@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register — Sentiment Analyzer</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',sans-serif;background:#f0f2f5;display:flex;justify-content:center;align-items:center;min-height:100vh}
+    .card{background:white;border-radius:14px;padding:2rem;width:100%;max-width:400px;box-shadow:0 2px 16px rgba(0,0,0,0.09)}
+    h1{font-size:22px;margin-bottom:4px;color:#1a1a1a}
+    .sub{font-size:13px;color:#888;margin-bottom:1.5rem}
+    label{font-size:13px;color:#555;display:block;margin-bottom:5px;margin-top:12px}
+    input{width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:10px 12px;font-size:14px}
+    input:focus{outline:none;border-color:#7f77dd}
+    button{margin-top:16px;width:100%;padding:12px;background:#534AB7;color:white;border:none;border-radius:8px;font-size:15px;cursor:pointer}
+    button:hover{background:#3C3489}
+    .link{text-align:center;margin-top:12px;font-size:13px;color:#888}
+    .link a{color:#534AB7;text-decoration:none}
+    .flash{padding:10px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;background:#fcebeb;color:#791F1F}
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>Create account</h1>
+  <p class="sub">Join Sentiment Analyzer</p>
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      {% for m in messages %}<div class="flash">{{ m }}</div>{% endfor %}
+    {% endif %}
+  {% endwith %}
+  <form method="POST">
+    <label>Username</label>
+    <input type="text" name="username" required placeholder="Choose a username">
+    <label>Email</label>
+    <input type="email" name="email" required placeholder="Enter your email">
+    <label>Password</label>
+    <input type="password" name="password" required placeholder="Create a password">
+    <button type="submit">Create Account</button>
+  </form>
+  <div class="link">Already have an account? <a href="/login">Login</a></div>
+</div>
+</body>
+</html>

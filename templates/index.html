@@ -47,10 +47,26 @@
     .hist-label.neutral{background:#f1efe8;color:#444}
     .hist-text{color:#555;font-size:12px}
     .badge{font-size:11px;padding:2px 8px;border-radius:10px;background:#eeedfe;color:#3C3489;margin-left:8px;font-weight:500}
+    nav a{font-size:13px;color:#534AB7;text-decoration:none;padding:6px 14px;border-radius:8px;border:1px solid #e0e0e0;background:white}
+    nav a:hover{background:#f0eeff}
   </style>
 </head>
 <body>
+
+<div style="max-width:900px;margin:0 auto;padding:0 0 1rem">
+  <nav style="display:flex;gap:12px;align-items:center">
+    <a href="/">Analyze</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/upload">CSV Upload</a>
+    <a href="/scrape">URL Scraper</a>
+    <span style="margin-left:auto;font-size:13px;color:#888">Hi, {{ current_user.username }}</span>
+    <a href="/logout" style="color:#E24B4A;border-color:#fdd">Logout</a>
+  </nav>
+</div>
+
 <div class="page">
+
+  <!-- LEFT COLUMN -->
   <div>
     <h1>🔍 Sentiment Analyzer</h1>
     <p class="sub">ML-powered analysis using {{ metadata.dataset }}</p>
@@ -66,12 +82,15 @@
       <div class="result-box {{ result }}">
         <div class="rlabel">Detected sentiment</div>
         <div class="rvalue">
-          {% if result=='positive'%}😊 Positive
-          {% elif result=='negative'%}😞 Negative
-          {% else %}😐 Neutral{% endif %}
+          {% if result == 'positive' %}😊 Positive
+          {% elif result == 'negative' %}😞 Negative
+          {% else %}😐 Neutral
+          {% endif %}
         </div>
         <div class="conf">Confidence: <strong>{{ confidence }}%</strong></div>
-        <div class="bar-bg"><div class="bar-fill" style="width:{{confidence}}%"></div></div>
+        <div class="bar-bg">
+          <div class="bar-fill" style="width:{{ confidence }}%"></div>
+        </div>
       </div>
       {% endif %}
 
@@ -90,24 +109,41 @@
       <h2>Recent analyses</h2>
       {% for h in history %}
       <div class="hist-item">
-        <span class="hist-label {{ h.label }}">{{ h.label }} · {{ h.confidence }}%</span>
+        <span class="hist-label {{ h.sentiment }}">{{ h.sentiment }} · {{ h.confidence }}%</span>
         <div class="hist-text">{{ h.text }}</div>
       </div>
       {% endfor %}
     </div>
     {% endif %}
+
   </div>
 
+  <!-- RIGHT COLUMN -->
   <div>
     <div class="card">
       <h2>Model performance <span class="badge">{{ metadata.model_name }}</span></h2>
       <div class="stats">
-        <div class="stat"><div class="val">{{ metadata.accuracy }}%</div><div class="lbl">Accuracy</div></div>
-        <div class="stat"><div class="val">{{ metadata.f1_score }}%</div><div class="lbl">F1 Score</div></div>
-        <div class="stat"><div class="val">{{ metadata.train_size }}</div><div class="lbl">Train samples</div></div>
-        <div class="stat"><div class="val">{{ metadata.test_size }}</div><div class="lbl">Test samples</div></div>
+        <div class="stat">
+          <div class="val">{{ metadata.accuracy }}%</div>
+          <div class="lbl">Accuracy</div>
+        </div>
+        <div class="stat">
+          <div class="val">{{ metadata.f1_score }}%</div>
+          <div class="lbl">F1 Score</div>
+        </div>
+        <div class="stat">
+          <div class="val">{{ metadata.train_size }}</div>
+          <div class="lbl">Train samples</div>
+        </div>
+        <div class="stat">
+          <div class="val">{{ metadata.test_size }}</div>
+          <div class="lbl">Test samples</div>
+        </div>
       </div>
-      <div style="font-size:12px;color:#aaa">Dataset: {{ metadata.dataset }}<br>Features: {{ metadata.features }} TF-IDF · N-grams: {{ metadata.ngrams }}</div>
+      <div style="font-size:12px;color:#aaa">
+        Dataset: {{ metadata.dataset }}<br>
+        Features: {{ metadata.features }} TF-IDF · N-grams: {{ metadata.ngrams }}
+      </div>
     </div>
 
     <div class="card">
@@ -115,10 +151,13 @@
       <img src="/static/confusion_matrix.png" class="cm-img" alt="Confusion Matrix">
     </div>
   </div>
+
 </div>
 
 <script>
-  function fill(t){ document.querySelector('textarea[name=review]').value = t; }
+  function fill(t) {
+    document.querySelector('textarea[name=review]').value = t;
+  }
 </script>
 </body>
 </html>
